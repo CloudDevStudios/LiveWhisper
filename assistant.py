@@ -42,17 +42,19 @@ class Assistant:
         if query in ([AIname],["hey",AIname],["okay",AIname],["ok",AIname]): # if that's all they said, prompt for more input
             self.speak('Yes?')
             self.prompted = True
-        if queried := self.prompted or string[1:].startswith((AIname,"hey "+AIname,"okay "+AIname,"ok "+AIname)): #AIname in query
+        if queried := self.prompted or string[1:].startswith(
+            (AIname, f"hey {AIname}", f"okay {AIname}", f"ok {AIname}")
+        ): #AIname in query
             query = [word for word in query if word not in {"hey","okay","ok",AIname}] # remake query without AIname prompts
         if self.askwiki or (queried and "wikipedia" in query or "wiki" in query):
             wikiwords = {"okay","hey",AIname,"please","could","would","do","a","check","i","need","wikipedia",
                         "search","for","on","what","whats","who","whos","is","was","an","does","say","can",
                         "you","tell","give","get","me","results","info","information","about","something","ok"}
             query = [word for word in query if word not in wikiwords] # remake query without wikiwords
-            if query == [] and not self.askwiki: # if query is empty after removing wikiwords, ask user for search term
+            if not query and not self.askwiki: # if query is empty after removing wikiwords, ask user for search term
                 self.speak("What would you like to know about?")
                 self.askwiki = True
-            elif query == [] and self.askwiki: # if query is still empty, cancel search
+            elif not query: # if query is still empty, cancel search
                 self.speak("No search term given, canceling.")
                 self.askwiki = False
             else:
@@ -118,7 +120,10 @@ class Assistant:
         curTime = time.time()
         if curTime - self.weatherSave[1] > 300 or self.weatherSave[1] == 0: # if last weather request was over 5 minutes ago
             try:
-                html = requests.get("https://www.google.com/search?q=weather"+City, {'User-Agent':self.ua}).content
+                html = requests.get(
+                    f"https://www.google.com/search?q=weather{City}",
+                    {'User-Agent': self.ua},
+                ).content
                 soup = BeautifulSoup(html, 'html.parser')
                 loc = soup.find("span",attrs={"class":"BNeawe tAd8D AP7Wnd"}).text.split(',')[0]
                 skyc = soup.find('div', attrs={'class':'BNeawe tAd8D AP7Wnd'}).text.split('\n')[1]
@@ -145,7 +150,9 @@ class Assistant:
 
     def getother(self, text) -> str:
         try:
-            html = requests.get("https://www.google.com/search?q="+text, {'User-Agent':self.ua}).content
+            html = requests.get(
+                f"https://www.google.com/search?q={text}", {'User-Agent': self.ua}
+            ).content
             soup = BeautifulSoup(html, 'html.parser')
             return soup.find('div', attrs={'class':'BNeawe iBp4i AP7Wnd'}).text
         except:
@@ -153,7 +160,11 @@ class Assistant:
 
     def orday(self) -> str:  # Returns day of the month with Ordinal suffix: 1st, 2nd, 3rd, 4th, etc.
         day = time.strftime("%-d")
-        return day+'th' if int(day) in [11,12,13] else day+{1:'st',2:'nd',3:'rd'}.get(int(day)%10,'th')
+        return (
+            f'{day}th'
+            if int(day) in {11, 12, 13}
+            else day + {1: 'st', 2: 'nd', 3: 'rd'}.get(int(day) % 10, 'th')
+        )
 
 def main():
     try:

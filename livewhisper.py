@@ -20,7 +20,7 @@ EndBlocks = 40      # Number of blocks to wait before sending to Whisper
 
 class StreamHandler:
     def __init__(self, assist=None):
-        if assist == None:  # If not being run by my assistant, just run as terminal transcriber.
+        if assist is None:  # If not being run by my assistant, just run as terminal transcriber.
             class fakeAsst(): running, talking, analyze = True, False, None
             self.asst = fakeAsst()  # anyone know a better way to do this?
         else: self.asst = assist
